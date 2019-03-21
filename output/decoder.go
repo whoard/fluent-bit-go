@@ -18,12 +18,14 @@
 package output
 
 import (
-	"unsafe"
-	"reflect"
-	"encoding/binary"
-	"github.com/ugorji/go/codec"
-	"time"
 	"C"
+	"encoding/binary"
+	"fmt"
+	"reflect"
+	"time"
+	"unsafe"
+
+	"github.com/ugorji/go/codec"
 )
 
 type FLBDecoder struct {
@@ -54,7 +56,7 @@ func (f FLBTime) UpdateExt(dest interface{}, v interface{}) {
 	panic("unsupported")
 }
 
-func NewDecoder(data unsafe.Pointer, length int) (*FLBDecoder) {
+func NewDecoder(data unsafe.Pointer, length int) *FLBDecoder {
 	var b []byte
 
 	dec := new(FLBDecoder)
@@ -77,10 +79,18 @@ func GetRecord(dec *FLBDecoder) (ret int, ts interface{}, rec map[interface{}]in
 	}
 
 	slice := reflect.ValueOf(m)
+	// avoid panic if it's not slice and debug
+	k := slice.Kind()
+	fmt.Println("Kind ", k)
+	if reflect.Slice != k {
+		fmt.Println("Value: ", slice)
+		return -1, 0, nil
+	}
+
 	t := slice.Index(0).Interface()
 	data := slice.Index(1)
 
-	map_data := data.Interface().(map[interface{}] interface{})
+	map_data := data.Interface().(map[interface{}]interface{})
 
 	return 0, t, map_data
 }
