@@ -81,9 +81,9 @@ func GetRecord(dec *FLBDecoder) (ret int, ts interface{}, rec map[interface{}]in
 	slice := reflect.ValueOf(m)
 	// avoid panic if it's not slice and debug
 	k := slice.Kind()
-	fmt.Println("Kind ", k)
 	if reflect.Slice != k {
-		fmt.Println("Value: ", slice)
+		fmt.Println("Kind:", k)
+		fmt.Println("Value:", slice)
 		return -1, 0, nil
 	}
 
