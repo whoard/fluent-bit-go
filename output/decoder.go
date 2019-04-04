@@ -20,7 +20,6 @@ package output
 import (
 	"C"
 	"encoding/binary"
-	"fmt"
 	"reflect"
 	"time"
 	"unsafe"
@@ -56,15 +55,12 @@ func (f FLBTime) UpdateExt(dest interface{}, v interface{}) {
 	panic("unsupported")
 }
 
-func NewDecoder(data unsafe.Pointer, length int) *FLBDecoder {
+func NewDecoder(data unsafe.Pointer, length int) (*FLBDecoder) {
 	var b []byte
 
 	dec := new(FLBDecoder)
 	dec.handle = new(codec.MsgpackHandle)
-	err := dec.handle.SetExt(reflect.TypeOf(FLBTime{}), 0, &FLBTime{})
-	if nil != err {
-		fmt.Println("Error:", err)
-	}
+	dec.handle.SetExt(reflect.TypeOf(FLBTime{}), 0, &FLBTime{})
 
 	b = C.GoBytes(data, C.int(length))
 	dec.mpdec = codec.NewDecoderBytes(b, dec.handle)
@@ -83,10 +79,11 @@ func GetRecord(dec *FLBDecoder) (ret int, ts interface{}, rec map[interface{}]in
 
 	slice := reflect.ValueOf(m)
 	// avoid panic if it's not slice and debug
+	// fluent-bit is sending ill-formatted data
+	// first byte = 0 which means positive fixint
+	// along with length > 1
 	k := slice.Kind()
 	if reflect.Slice != k {
-		fmt.Println("Kind:", k)
-		fmt.Println("Value:", slice)
 		return -1, 0, nil
 	}
 
