@@ -1,3 +1,3 @@
-module github.com/fluent/fluent-bit-go
+module github.com/whoard/fluent-bit-go
 
 require github.com/ugorji/go v1.1.4
